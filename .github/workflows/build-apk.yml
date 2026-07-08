@@ -38,29 +38,32 @@ jobs:
         env:
           EXPO_NO_DOTENV: 1
 
-      - name: Build release APK
+      - name: Build debug APK (no keystore needed)
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon -x lint -x lintRelease
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tail -80
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
+          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin_jdk/17.0.0-0/x64
 
-      - name: Copy APK
+      - name: Find and copy APK
+        id: apk
         run: |
           APK=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
-          echo "Found APK: $APK"
+          echo "Found: $APK"
           cp "$APK" aion-agent.apk
+          ls -lh aion-agent.apk
 
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest-apk
-          name: "AION Agent — Latest APK Build"
+          name: "AION Agent — Latest Build"
           body: |
             ## AION — Autonomous Local AI Agent
 
-            ### تحميل APK مباشر
+            ### تحميل APK
             ⬇️ حمّل `aion-agent.apk` من الأسفل
 
             ### الميزات
@@ -73,8 +76,8 @@ jobs:
 
             ### التثبيت
             1. حمّل aion-agent.apk
-            2. Settings → Security → Unknown Sources: تشغيل
-            3. افتح الـ APK وثبّت
+            2. Settings → Security → Unknown Sources: ON
+            3. افتح وثبّت
           files: aion-agent.apk
           make_latest: true
         env:
