@@ -1,0 +1,77 @@
+name: Build and Release APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build Android APK (local)
+        run: |
+          npx expo prebuild --platform android --clean
+          cd android
+          ./gradlew assembleRelease --no-daemon
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+
+      - name: Sign APK (debug key for now)
+        run: |
+          APK=$(find android/app/build/outputs -name "*.apk" | head -1)
+          echo "APK: $APK"
+          cp "$APK" aion-agent.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: "AION Agent v${{ github.run_number }}"
+          body: |
+            ## AION — Autonomous Local AI Agent
+            
+            ### Features
+            - Tree of Thought (ToT) reasoning
+            - ReAct loop with real tool execution
+            - Real Linux terminal (connects to Express backend)
+            - Vision / Image analysis
+            - Code editor with run + GitHub push
+            - File drag & drop (APK, any file)
+            - Offline LLM via Ollama/Phi-3 Mini
+            
+            ### Install
+            Download `aion-agent.apk`, enable "Unknown sources" in Android settings, then install.
+          files: aion-agent.apk
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
