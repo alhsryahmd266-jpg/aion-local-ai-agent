@@ -7,77 +7,44 @@ on:
 
 jobs:
   build:
-    name: Build Android APK
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: "10"
           run_install: false
-
-      - name: Install dependencies
+      - name: Install deps
         run: pnpm install
-
-      - name: Prebuild Android
+      - name: Expo prebuild
         run: npx expo prebuild --platform android --clean --no-install
         env:
           EXPO_NO_DOTENV: 1
-
-      - name: Build debug APK (no keystore needed)
+      - name: Gradle assembleDebug
         working-directory: android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tail -80
+        run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
-          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin_jdk/17.0.0-0/x64
-
-      - name: Find and copy APK
-        id: apk
+      - name: Find APK
         run: |
-          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
-          echo "Found: $APK"
-          cp "$APK" aion-agent.apk
+          find . -name "*.apk" ! -path "*/node_modules/*" 2>/dev/null
+          cp android/app/build/outputs/apk/debug/app-debug.apk aion-agent.apk
           ls -lh aion-agent.apk
-
-      - name: Create GitHub Release
+      - name: Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest-apk
-          name: "AION Agent — Latest Build"
+          name: "AION Agent APK"
           body: |
             ## AION — Autonomous Local AI Agent
-
-            ### تحميل APK
-            ⬇️ حمّل `aion-agent.apk` من الأسفل
-
-            ### الميزات
-            - 🧠 Tree of Thought reasoning
-            - 🔄 ReAct Loop + real tools
-            - 💻 Linux Terminal حقيقي
-            - 👁️ Vision & image analysis
-            - 📝 Code Editor + GitHub push
-            - 🤖 Offline LLM (Ollama/Phi-3)
-
-            ### التثبيت
-            1. حمّل aion-agent.apk
-            2. Settings → Security → Unknown Sources: ON
-            3. افتح وثبّت
+            حمّل aion-agent.apk وثبّته (Unknown Sources ON)
           files: aion-agent.apk
           make_latest: true
         env:
