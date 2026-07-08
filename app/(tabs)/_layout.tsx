@@ -24,44 +24,19 @@ export default function TabLayout() {
           elevation: 0,
           height: Platform.OS === "web" ? 84 : undefined,
         },
+        tabBarLabelStyle: { fontSize: 10 },
         tabBarBackground: () =>
           isIOS ? (
-            <BlurView
-              intensity={80}
-              tint={isDark ? "dark" : "light"}
-              style={StyleSheet.absoluteFill}
-            />
+            <BlurView intensity={80} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
           ) : null,
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Chat",
-          tabBarIcon: ({ color, size }) => <Feather name="message-circle" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="terminal"
-        options={{
-          title: "Terminal",
-          tabBarIcon: ({ color, size }) => <Feather name="terminal" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="tools"
-        options={{
-          title: "Tools",
-          tabBarIcon: ({ color, size }) => <Feather name="zap" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: "Settings",
-          tabBarIcon: ({ color, size }) => <Feather name="settings" size={size} color={color} />,
-        }}
-      />
+      <Tabs.Screen name="index" options={{ title: "Chat", tabBarIcon: ({ color, size }) => <Feather name="message-circle" size={size} color={color} /> }} />
+      <Tabs.Screen name="terminal" options={{ title: "Terminal", tabBarIcon: ({ color, size }) => <Feather name="terminal" size={size} color={color} /> }} />
+      <Tabs.Screen name="vision" options={{ title: "Vision", tabBarIcon: ({ color, size }) => <Feather name="eye" size={size} color={color} /> }} />
+      <Tabs.Screen name="editor" options={{ title: "Editor", tabBarIcon: ({ color, size }) => <Feather name="code" size={size} color={color} /> }} />
+      <Tabs.Screen name="tools" options={{ title: "Tools", tabBarIcon: ({ color, size }) => <Feather name="zap" size={size} color={color} /> }} />
+      <Tabs.Screen name="settings" options={{ title: "Config", tabBarIcon: ({ color, size }) => <Feather name="settings" size={size} color={color} /> }} />
     </Tabs>
   );
 }
