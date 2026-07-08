@@ -5,41 +5,55 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "aion-agent",
+    "scheme": "aion",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#050508"
-    },
     "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "com.aion.localagent"
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aion.agent"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#050508"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#0a0a12"
       },
-      "package": "com.aion.localagent"
+      "package": "com.aion.agent",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
-      "favicon": "./assets/images/icon.png"
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "expo-router",
+      "expo-font",
       [
-        "expo-router",
+        "expo-splash-screen",
         {
-          "origin": "https://replit.com/"
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0a0a12"
         }
       ],
-      "expo-font",
-      "expo-web-browser"
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "AION needs photo access for vision analysis",
+          "cameraPermission": "AION needs camera access for vision analysis"
+        }
+      ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     }
   }
 }
