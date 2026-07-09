@@ -1,51 +1,61 @@
-name: Build APK
+name: Build AION APK
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: 22
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: 17
+
       - uses: pnpm/action-setup@v4
         with:
-          version: "10"
-          run_install: false
+          version: 10
+
       - name: Install deps
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
+
       - name: Expo prebuild
-        run: npx expo prebuild --platform android --clean --no-install
+        run: npx expo prebuild --platform android --clean
         env:
-          EXPO_NO_DOTENV: 1
+          EXPO_NO_TELEMETRY: 1
+
       - name: Gradle assembleDebug
-        working-directory: android
         run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | grep -E "(FAILURE|error:|Error:|> Task|What went wrong|Caused by|Exception)" | head -60
-          ./gradlew assembleDebug --no-daemon
-        env:
-          ANDROID_HOME: /usr/local/lib/android/sdk
+          cd android
+          ./gradlew assembleDebug --no-daemon 2>&1
+          cd ..
+
       - name: Copy APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk aion-agent.apk && ls -lh aion-agent.apk
-      - name: Release
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk aion-agent.apk
+          ls -lh aion-agent.apk
+
+      - name: Upload Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest-apk
-          name: "AION Agent APK"
+          name: AION Agent APK
           body: |
             ## AION — Autonomous Local AI Agent
             حمّل aion-agent.apk وثبّته (Unknown Sources ON)
           files: aion-agent.apk
           make_latest: true
+          overwrite_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
